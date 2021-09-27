@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Instabug Challenge</string>
+    <string name="error_text">Something went wrong, please try again later</string>
+    <string name="no_result_found">No Result Found</string>
+    <string name="search">Search</string>
+    <string name="sort">Sort</string>
+    <string name="enter_a_word_to_search">Enter a word to search or click search icon again to close.</string>
+    <string name="preference_name">com.example.instabugsearchwords.prefernce_file</string>
+</resources>
