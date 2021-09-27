@@ -74,9 +74,17 @@ public class WordsListFragment extends Fragment {
         int selectedItem = item.getItemId();
         if (selectedItem == R.id.action_search) {
             mViewModel.onSearchClicked();
+            return true;
+        } else if(selectedItem == R.id.action_sort_ascending){
+            mViewModel.onSortAscendingClicked();
+            return true;
+        } else if(selectedItem == R.id.action_sort_descending){
+            mViewModel.onSortDescendingClicked();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     private void initRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireActivity());

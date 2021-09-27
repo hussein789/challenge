@@ -7,17 +7,20 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.instabugsearchwords.data.repo.WordsCallback;
 import com.example.instabugsearchwords.domain.get_words.GetWordsUseCase;
+import com.example.instabugsearchwords.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kotlin.collections.AbstractMutableList;
+
 public class WordsListViewModel extends ViewModel {
 
     private GetWordsUseCase wordsUseCase;
 
-    public WordsListViewModel(GetWordsUseCase wordsUseCase){
+    public WordsListViewModel(GetWordsUseCase wordsUseCase) {
         this.wordsUseCase = wordsUseCase;
     }
 
@@ -26,16 +29,19 @@ public class WordsListViewModel extends ViewModel {
     MutableLiveData<Boolean> showLoading = new MutableLiveData<>();
     MutableLiveData<Boolean> showError = new MutableLiveData<>();
     MutableLiveData<Boolean> showEmptyState = new MutableLiveData<>();
-    MutableLiveData<List<Pair<String,Integer>>> updateList = new MutableLiveData<>();
+    MutableLiveData<List<Pair<String, Integer>>> updateList = new MutableLiveData<>();
     MutableLiveData<Boolean> showSearchLD = new MutableLiveData<>(false);
+    MutableLiveData<Boolean> isLoadedFromBackend;
 
-    void getWords(){
+
+    void getWords() {
+        isLoadedFromBackend = new MutableLiveData<>();
         showLoading.postValue(true);
         wordsUseCase.getWords(new WordsCallback() {
             @Override
             public void onSuccess(String response) {
                 updateWordsMapFromResponse(response);
-                List<Pair<String,Integer>> formattedList = getOrdinalListFromMap();
+                List<Pair<String, Integer>> formattedList = getOrdinalListFromMap();
                 updateList(formattedList);
                 showLoading.postValue(false);
             }
@@ -52,9 +58,9 @@ public class WordsListViewModel extends ViewModel {
     }
 
     private List<Pair<String, Integer>> getOrdinalListFromMap() {
-        List<Pair<String,Integer>> list = new ArrayList<>();
+        List<Pair<String, Integer>> list = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : wordsMap.entrySet()) {
-            list.add(new Pair(entry.getKey(),entry.getValue()));
+            list.add(new Pair(entry.getKey(), entry.getValue()));
         }
         return list;
     }
@@ -87,22 +93,44 @@ public class WordsListViewModel extends ViewModel {
     }
 
     public void onSearchTextChanged(String searchedText) {
-        if(searchedText == null || searchedText.isEmpty()){
-            List<Pair<String,Integer>> list = getOrdinalListFromMap();
+        if (searchedText == null || searchedText.isEmpty()) {
+            List<Pair<String, Integer>> list = getOrdinalListFromMap();
             updateList(list);
         } else {
-            List<Pair<String,Integer>> searchedList = getSearchedListFromMap(searchedText);
+            List<Pair<String, Integer>> searchedList = getSearchedListFromMap(searchedText);
             updateList(searchedList);
         }
     }
 
     private List<Pair<String, Integer>> getSearchedListFromMap(String searchedText) {
-        List<Pair<String,Integer>> list = new ArrayList<>();
+        List<Pair<String, Integer>> list = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : wordsMap.entrySet()) {
             if (entry.getKey().toLowerCase().contains(searchedText.toLowerCase())) {
-                list.add(new Pair(entry.getKey(),entry.getValue()));
+                list.add(new Pair(entry.getKey(), entry.getValue()));
             }
         }
         return list;
     }
+
+    public void onSortAscendingClicked() {
+        List<Pair<String, Integer>> sortedItems = sortItems(true);
+        updateList(sortedItems);
+    }
+
+    public void onSortDescendingClicked() {
+        List<Pair<String, Integer>> sortedItems = sortItems(false);
+        updateList(sortedItems);
+    }
+
+    public List<Pair<String,Integer>> sortItems(boolean ascending){
+        HashMap<String,Integer> sortedList = Utils.sortByValue(wordsMap,ascending);
+        List<Pair<String,Integer>> list = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : sortedList.entrySet()) {
+            list.add(new Pair(entry.getKey(),entry.getValue()));
+        }
+        return list;
+    }
+
+
+
 }
