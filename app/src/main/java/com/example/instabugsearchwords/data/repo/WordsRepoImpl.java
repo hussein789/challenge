@@ -38,8 +38,9 @@ public class WordsRepoImpl implements WordsRepo {
                         }
                     }
                 });
+        } else {
+            callback.onSuccess(cachedWords);
         }
-        callback.onSuccess(cachedWords);
     }
 
     @Override

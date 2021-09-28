@@ -39,14 +39,20 @@ public class WordsListViewModel extends ViewModel {
         wordsUseCase.getWords(new WordsCallback() {
             @Override
             public void onSuccess(String response) {
-                updateWordsMapFromResponse(response);
-                List<Pair<String, Integer>> formattedList = getOrdinalListFromMap();
-                updateList(formattedList);
+                if(response.isEmpty()){
+                    showEmptyState.postValue(true);
+                } else {
+                    updateWordsMapFromResponse(response);
+                    List<Pair<String, Integer>> formattedList = getOrdinalListFromMap();
+                    updateList(formattedList);
+                }
+
                 showLoading.postValue(false);
             }
 
             @Override
             public void onFail(String message) {
+                showError.postValue(true);
                 showLoading.postValue(false);
             }
         });
@@ -122,7 +128,7 @@ public class WordsListViewModel extends ViewModel {
         HashMap<String,Integer> sortedList = Utils.sortByValue(wordsMap,isSortAscending);
         List<Pair<String,Integer>> list = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : sortedList.entrySet()) {
-            Pair<String,Integer> newItem = new Pair(entry.getKey().toString(),Integer.valueOf(entry.getValue()));
+            Pair<String,Integer> newItem = new Pair(entry.getKey(),entry.getValue());
             list.add(newItem);
         }
         return list;

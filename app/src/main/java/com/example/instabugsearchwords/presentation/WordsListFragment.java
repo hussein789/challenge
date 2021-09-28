@@ -139,11 +139,18 @@ public class WordsListFragment extends Fragment {
         }
 
         private void updateList (List < Pair < String, Integer >> list){
+            showList();
             adapter.setData(list);
             adapter.notifyDataSetChanged();
         }
 
-        private void handleEmptyState (Boolean showEmpty){
+    private void showList() {
+        binding.tvError.setVisibility(View.GONE);
+        binding.tvEmptyText.setVisibility(View.GONE);
+        binding.rvWords.setVisibility(View.VISIBLE);
+    }
+
+    private void handleEmptyState (Boolean showEmpty){
             if (showEmpty) {
                 binding.tvError.setVisibility(View.GONE);
                 binding.tvEmptyText.setVisibility(View.VISIBLE);
