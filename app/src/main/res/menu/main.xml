@@ -10,20 +10,11 @@
         />
 
     <item
-        android:id="@+id/action_sort_ascending"
+        android:id="@+id/action_sort"
         android:title="@string/sort"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_baseline_vertical_align_bottom_24"
-        android:orderInCategory="2"
-        />
-
-    <item
-        android:id="@+id/action_sort_descending"
-        android:title="@string/sort"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_baseline_vertical_align_top_24"
-        android:orderInCategory="2"
-        />
+        android:icon="@drawable/ic_baseline_sort_24"
+        android:orderInCategory="2"/>
 
 </menu>
 

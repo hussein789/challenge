@@ -25,17 +25,16 @@ public class WordsListViewModel extends ViewModel {
     }
 
     Map<String, Integer> wordsMap = new HashMap<>();
+    boolean isSortAscending = true;
 
     MutableLiveData<Boolean> showLoading = new MutableLiveData<>();
     MutableLiveData<Boolean> showError = new MutableLiveData<>();
     MutableLiveData<Boolean> showEmptyState = new MutableLiveData<>();
     MutableLiveData<List<Pair<String, Integer>>> updateList = new MutableLiveData<>();
     MutableLiveData<Boolean> showSearchLD = new MutableLiveData<>(false);
-    MutableLiveData<Boolean> isLoadedFromBackend;
 
 
     void getWords() {
-        isLoadedFromBackend = new MutableLiveData<>();
         showLoading.postValue(true);
         wordsUseCase.getWords(new WordsCallback() {
             @Override
@@ -81,6 +80,7 @@ public class WordsListViewModel extends ViewModel {
     }
 
     private boolean isWord(String s) {
+        if(s.length() < 3) return false;
         for (int i = 0; i < s.length(); i++) {
             if (!Character.isLetter(s.charAt(i)))
                 return false;
@@ -112,25 +112,20 @@ public class WordsListViewModel extends ViewModel {
         return list;
     }
 
-    public void onSortAscendingClicked() {
-        List<Pair<String, Integer>> sortedItems = sortItems(true);
-        updateList(sortedItems);
+    public void onSortClicked() {
+        List<Pair<String,Integer>> sortedList = sortItems();
+        updateList(sortedList);
+        isSortAscending = !isSortAscending;
     }
 
-    public void onSortDescendingClicked() {
-        List<Pair<String, Integer>> sortedItems = sortItems(false);
-        updateList(sortedItems);
-    }
-
-    public List<Pair<String,Integer>> sortItems(boolean ascending){
-        HashMap<String,Integer> sortedList = Utils.sortByValue(wordsMap,ascending);
+    public List<Pair<String,Integer>> sortItems(){
+        HashMap<String,Integer> sortedList = Utils.sortByValue(wordsMap,isSortAscending);
         List<Pair<String,Integer>> list = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : sortedList.entrySet()) {
-            list.add(new Pair(entry.getKey(),entry.getValue()));
+            Pair<String,Integer> newItem = new Pair(entry.getKey().toString(),Integer.valueOf(entry.getValue()));
+            list.add(newItem);
         }
         return list;
     }
-
-
 
 }

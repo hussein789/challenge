@@ -75,11 +75,8 @@ public class WordsListFragment extends Fragment {
         if (selectedItem == R.id.action_search) {
             mViewModel.onSearchClicked();
             return true;
-        } else if(selectedItem == R.id.action_sort_ascending){
-            mViewModel.onSortAscendingClicked();
-            return true;
-        } else if(selectedItem == R.id.action_sort_descending){
-            mViewModel.onSortDescendingClicked();
+        } else if(selectedItem == R.id.action_sort) {
+            mViewModel.onSortClicked();
             return true;
         }
         return super.onOptionsItemSelected(item);
