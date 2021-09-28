@@ -1,169 +1,139 @@
-package com.example.instabugsearchwords.presentation;
+package com.example.instabugsearchwords.presentation
 
-import androidx.lifecycle.ViewModelProvider;
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Pair
+import android.view.*
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.instabugsearchwords.R
+import com.example.instabugsearchwords.databinding.WordsListFragmentBinding
+import com.example.instabugsearchwords.domain.di.ServiceLocator.Companion.instance
 
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.example.instabugsearchwords.R;
-import com.example.instabugsearchwords.databinding.WordsListFragmentBinding;
-import com.example.instabugsearchwords.domain.di.ServiceLocator;
-
-import java.util.List;
-
-public class WordsListFragment extends Fragment {
-
-    private WordsListViewModel mViewModel;
-    private WordsListFragmentBinding binding;
-    private WordListAdapter adapter;
-
-    public static WordsListFragment newInstance() {
-        return new WordsListFragment();
+class WordsListFragment : Fragment() {
+    private lateinit var mViewModel: WordsListViewModel
+    private lateinit var binding: WordsListFragmentBinding
+    private lateinit var adapter: WordListAdapter
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = WordsListFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        binding = WordsListFragmentBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val factory = instance!!.provideWordsListFactory(requireActivity())
+        mViewModel = ViewModelProvider(this, factory).get(WordsListViewModel::class.java)
+        initRecyclerView()
+        initTextWatcher()
+        observeViewModel()
+        mViewModel.init()
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        WordsListViewModelFactory factory = ServiceLocator.getInstance().provideWordsListFactory(requireActivity());
-        mViewModel = new ViewModelProvider(this, factory).get(WordsListViewModel.class);
-        initRecyclerView();
-        initTextWatcher();
-        observeViewModel();
-        mViewModel.init();
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        requireActivity().menuInflater.inflate(R.menu.main, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.main, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int selectedItem = item.getItemId();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val selectedItem = item.itemId
         if (selectedItem == R.id.action_search) {
-            mViewModel.onSearchClicked();
-            return true;
+            mViewModel.onSearchClicked()
+            return true
         } else if (selectedItem == R.id.action_sort) {
-            mViewModel.onSortClicked();
-            return true;
+            mViewModel.onSortClicked()
+            return true
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
-    private void initRecyclerView() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireActivity());
-        binding.rvWords.setLayoutManager(linearLayoutManager);
-        binding.rvWords.setHasFixedSize(true);
-        adapter = new WordListAdapter();
-        binding.rvWords.setAdapter(adapter);
+    private fun initRecyclerView() {
+        val linearLayoutManager = LinearLayoutManager(requireActivity())
+        binding.rvWords.layoutManager = linearLayoutManager
+        binding.rvWords.setHasFixedSize(true)
+        adapter = WordListAdapter()
+        binding.rvWords.adapter = adapter
     }
 
-    private void initTextWatcher() {
-        binding.etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+    private fun initTextWatcher() {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable) {
+                mViewModel.onSearchTextChanged(s.toString())
             }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                mViewModel.onSearchTextChanged(s.toString());
-            }
-        });
+        })
     }
 
-    private void observeViewModel() {
-        mViewModel.showLoading.observe(getViewLifecycleOwner(), showloading -> {
-            handleLoading(showloading);
-        });
-
-        mViewModel.showError.observe(getViewLifecycleOwner(), showError -> {
-            handleErrorState(showError);
-        });
-
-        mViewModel.showEmptyState.observe(getViewLifecycleOwner(), showEmpty -> {
-            handleEmptyState(showEmpty);
-        });
-
-        mViewModel.updateList.observe(getViewLifecycleOwner(), list -> {
-            updateList(list);
-        });
-
-        mViewModel.showSearchLD.observe(getViewLifecycleOwner(), show -> {
-            handleSearch(show);
-        });
+    private fun observeViewModel() {
+        mViewModel.showLoading.observe(
+            viewLifecycleOwner,
+            { showloading: Boolean -> handleLoading(showloading) })
+        mViewModel.showError.observe(
+            viewLifecycleOwner,
+            { showError: Boolean -> handleErrorState(showError) })
+        mViewModel.showEmptyState.observe(
+            viewLifecycleOwner,
+            { showEmpty: Boolean -> handleEmptyState(showEmpty) })
+        mViewModel.updateList.observe(
+            viewLifecycleOwner,
+            { list: List<Pair<String, Int>> -> updateList(list) })
+        mViewModel.showSearchLD.observe(
+            viewLifecycleOwner,
+            { show: Boolean -> handleSearch(show) })
     }
 
-    private void handleSearch(Boolean show) {
-        if (show) binding.etSearch.setVisibility(View.VISIBLE);
-        else binding.etSearch.setVisibility(View.GONE);
+    private fun handleSearch(show: Boolean) {
+        if (show) binding.etSearch.visibility = View.VISIBLE else binding.etSearch.visibility =
+            View.GONE
     }
 
-    private void updateList(List<Pair<String, Integer>> list) {
-        showList();
-        adapter.setData(list);
-        adapter.notifyDataSetChanged();
+    private fun updateList(list: List<Pair<String, Int>>) {
+        showList()
+        adapter.setData(list)
+        adapter.notifyDataSetChanged()
     }
 
-    private void showList() {
-        binding.tvError.setVisibility(View.GONE);
-        binding.tvEmptyText.setVisibility(View.GONE);
-        binding.rvWords.setVisibility(View.VISIBLE);
+    private fun showList() {
+        binding.tvError.visibility = View.GONE
+        binding.tvEmptyText.visibility = View.GONE
+        binding.rvWords.visibility = View.VISIBLE
     }
 
-    private void handleEmptyState(Boolean showEmpty) {
+    private fun handleEmptyState(showEmpty: Boolean) {
         if (showEmpty) {
-            binding.tvError.setVisibility(View.GONE);
-            binding.tvEmptyText.setVisibility(View.VISIBLE);
-            binding.rvWords.setVisibility(View.GONE);
+            binding.tvError.visibility = View.GONE
+            binding.tvEmptyText.visibility = View.VISIBLE
+            binding.rvWords.visibility = View.GONE
         }
     }
 
-    private void handleErrorState(Boolean showError) {
+    private fun handleErrorState(showError: Boolean) {
         if (showError) {
-            binding.tvError.setVisibility(View.VISIBLE);
-            binding.tvEmptyText.setVisibility(View.GONE);
-            binding.rvWords.setVisibility(View.GONE);
+            binding.tvError.visibility = View.VISIBLE
+            binding.tvEmptyText.visibility = View.GONE
+            binding.rvWords.visibility = View.GONE
         }
     }
 
-    private void handleLoading(Boolean showloading) {
-        if (showloading) binding.pbLoadingIndicator.setVisibility(View.VISIBLE);
-        else binding.pbLoadingIndicator.setVisibility(View.GONE);
+    private fun handleLoading(showloading: Boolean) {
+        if (showloading) binding.pbLoadingIndicator.visibility =
+            View.VISIBLE else binding.pbLoadingIndicator.visibility = View.GONE
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(): WordsListFragment {
+            return WordsListFragment()
+        }
     }
 }

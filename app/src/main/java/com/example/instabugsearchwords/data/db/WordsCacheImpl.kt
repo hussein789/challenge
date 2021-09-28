@@ -1,28 +1,26 @@
-package com.example.instabugsearchwords.data.db;
+package com.example.instabugsearchwords.data.db
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Context
+import android.content.SharedPreferences
+import com.example.instabugsearchwords.R
 
-import com.example.instabugsearchwords.R;
+class WordsCacheImpl(context: Context) : WordsCache {
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(
+        context.getString(R.string.preference_name),
+        Context.MODE_PRIVATE
+    )
 
-public class WordsCacheImpl implements WordsCache {
-
-    private SharedPreferences sharedPreferences;
-    private static final String WORDS_KEY = "WORDS_KEY";
-
-    public WordsCacheImpl(Context context) {
-        sharedPreferences = context.getSharedPreferences(context.getString(R.string.preference_name), Context.MODE_PRIVATE);
+    override fun saveWords(wordsResponse: String?) {
+        val editor = sharedPreferences.edit()
+        editor.putString(WORDS_KEY, wordsResponse)
+        editor.apply()
     }
 
-    @Override
-    public void saveWords(String wordsResponse) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(WORDS_KEY, wordsResponse);
-        editor.apply();
+    override val wordsFromCache: String?
+        get() = sharedPreferences.getString(WORDS_KEY, "")
+
+    companion object {
+        private const val WORDS_KEY = "WORDS_KEY"
     }
 
-    @Override
-    public String getWordsFromCache() {
-        return sharedPreferences.getString(WORDS_KEY, "");
-    }
 }

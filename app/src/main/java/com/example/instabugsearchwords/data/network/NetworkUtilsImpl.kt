@@ -1,46 +1,44 @@
-package com.example.instabugsearchwords.data.network;
+package com.example.instabugsearchwords.data.network
 
-import android.net.Uri;
+import android.net.Uri
+import com.example.instabugsearchwords.data.network.NetworkUtils
+import com.example.instabugsearchwords.data.network.NetworkUtilsImpl
+import java.io.IOException
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
+import kotlin.Throws
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
-
-public class NetworkUtilsImpl implements NetworkUtils {
-
-    private static String INSTABUG_SEARCH_URL = "https://instabug.com";
-
-    @Override
-    public URL buildUrl() {
-        Uri uri = Uri.parse(INSTABUG_SEARCH_URL).buildUpon().build();
-        try {
-            URL url = new URL(uri.toString());
-            return url;
-        } catch (Exception exception) {
-            return null;
+class NetworkUtilsImpl : NetworkUtils {
+    override fun buildUrl(): URL? {
+        val uri = Uri.parse(INSTABUG_SEARCH_URL).buildUpon().build()
+        return try {
+            URL(uri.toString())
+        } catch (exception: Exception) {
+            null
         }
     }
 
-
-    @Override
-    public String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
+    @Throws(IOException::class)
+    override fun getResponseFromHttpUrl(url: URL?): String? {
+        val urlConnection = url!!.openConnection() as HttpURLConnection
+        return try {
+            val `in` = urlConnection.inputStream
+            val scanner = Scanner(`in`)
+            scanner.useDelimiter("\\A")
+            val hasInput = scanner.hasNext()
             if (hasInput) {
-                return scanner.next();
+                scanner.next()
             } else {
-                return null;
+                null
             }
         } finally {
-            urlConnection.disconnect();
+            urlConnection.disconnect()
         }
+    }
+
+    companion object {
+        private const val INSTABUG_SEARCH_URL = "https://instabug.com"
     }
 }

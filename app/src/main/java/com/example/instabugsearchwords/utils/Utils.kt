@@ -1,36 +1,22 @@
-package com.example.instabugsearchwords.utils;
+package com.example.instabugsearchwords.utils
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*
 
-public final class Utils {
+object Utils {
+    fun sortByValue(hm: Map<String, Int>, ascending: Boolean): HashMap<String, Int> {
+        val list: List<Map.Entry<String, Int>> = LinkedList(hm.entries)
 
-    public static HashMap<String, Integer> sortByValue(Map<String, Integer> hm,Boolean ascending)
-    {
-        // Create a list from elements of HashMap
-        List<Map.Entry<String, Integer> > list =
-                new LinkedList<Map.Entry<String, Integer> >(hm.entrySet());
-
-        // Sort the list
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer> >() {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2)
-            {
-                if(ascending) return (o1.getValue()).compareTo(o2.getValue());
-                else return (o2.getValue()).compareTo(o1.getValue());
-            }
-        });
-
-        // put data from sorted list to hashmap
-        HashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
+        Collections.sort(list) { o1, o2 ->
+            if (ascending) o1.value.compareTo(o2.value) else o2.value.compareTo(
+                o1.value
+            )
         }
-        return temp;
+
+
+        val temp: HashMap<String, Int> = LinkedHashMap()
+        for ((key, value) in list) {
+            temp[key] = value
+        }
+        return temp
     }
 }

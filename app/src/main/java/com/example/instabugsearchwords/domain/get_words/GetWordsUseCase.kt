@@ -1,10 +1,8 @@
-package com.example.instabugsearchwords.domain.get_words;
+package com.example.instabugsearchwords.domain.get_words
 
-import com.example.instabugsearchwords.data.repo.WordsCallback;
-import com.example.instabugsearchwords.data.repo.WordsRepo;
+import com.example.instabugsearchwords.data.repo.WordsCallback
 
-public interface GetWordsUseCase{
-    void getWords(WordsCallback callback);
-    void refreshWords(WordsCallback callback);
+interface GetWordsUseCase {
+    fun getWords(callback: WordsCallback)
+    fun refreshWords(callback: WordsCallback)
 }
-

@@ -1,6 +1,6 @@
-package com.example.instabugsearchwords.data.repo;
+package com.example.instabugsearchwords.data.repo
 
-public interface WordsCallback {
-    void onSuccess(String response);
-    void onFail(String message);
+interface WordsCallback {
+    fun onSuccess(response: String?)
+    fun onFail(message: String?)
 }

@@ -1,135 +1,121 @@
-package com.example.instabugsearchwords.presentation;
+package com.example.instabugsearchwords.presentation
 
-import android.util.Pair;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-import com.example.instabugsearchwords.data.repo.WordsCallback;
-import com.example.instabugsearchwords.domain.get_words.GetWordsUseCase;
-import com.example.instabugsearchwords.utils.Utils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.util.Pair
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.example.instabugsearchwords.data.repo.WordsCallback
+import com.example.instabugsearchwords.domain.get_words.GetWordsUseCase
+import com.example.instabugsearchwords.utils.Utils
+import java.util.*
 
-public class WordsListViewModel extends ViewModel {
+class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel() {
 
-    private GetWordsUseCase wordsUseCase;
+    private var wordsMap: MutableMap<String, Int> = HashMap()
+    private var isSortAscending = true
 
-    public WordsListViewModel(GetWordsUseCase wordsUseCase) {
-        this.wordsUseCase = wordsUseCase;
+    var showLoading = MutableLiveData<Boolean>()
+    var showError = MutableLiveData<Boolean>()
+    var showEmptyState = MutableLiveData<Boolean>()
+    var updateList = MutableLiveData<List<Pair<String?, Int?>>>()
+    var showSearchLD = MutableLiveData(false)
+
+    fun init() {
+        getWordsList()
     }
 
-    Map<String, Integer> wordsMap = new HashMap<>();
-    boolean isSortAscending = true;
+    private fun getWordsList() {
 
-    MutableLiveData<Boolean> showLoading = new MutableLiveData<>();
-    MutableLiveData<Boolean> showError = new MutableLiveData<>();
-    MutableLiveData<Boolean> showEmptyState = new MutableLiveData<>();
-    MutableLiveData<List<Pair<String, Integer>>> updateList = new MutableLiveData<>();
-    MutableLiveData<Boolean> showSearchLD = new MutableLiveData<>(false);
-
-    public void init() {
-       getWords();
-    }
-
-    void getWords() {
-        showLoading.postValue(true);
-        wordsUseCase.getWords(new WordsCallback() {
-            @Override
-            public void onSuccess(String response) {
-                if(response.isEmpty()){
-                    showEmptyState.postValue(true);
+        showLoading.postValue(true)
+        wordsUseCase.getWords(object : WordsCallback {
+            override fun onSuccess(response: String?) {
+                if (response?.isEmpty() == true) {
+                    showEmptyState.postValue(true)
                 } else {
-                    updateWordsMapFromResponse(response);
-                    List<Pair<String, Integer>> formattedList = getOrdinalListFromMap();
-                    updateList(formattedList);
+                    updateWordsMapFromResponse(response ?: "")
+                    val formattedList = getOrdinalListFromMap()
+                    updateList(formattedList)
                 }
-
-                showLoading.postValue(false);
+                showLoading.postValue(false)
             }
 
-            @Override
-            public void onFail(String message) {
-                showError.postValue(true);
-                showLoading.postValue(false);
+            override fun onFail(message: String?) {
+                showError.postValue(true)
+                showLoading.postValue(false)
             }
-        });
+        })
     }
 
-    private void updateList(List<Pair<String, Integer>> formattedList) {
-        updateList.postValue(formattedList);
+    private fun updateList(formattedList: List<Pair<String?, Int?>>) {
+        updateList.postValue(formattedList)
     }
 
-    private List<Pair<String, Integer>> getOrdinalListFromMap() {
-        List<Pair<String, Integer>> list = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : wordsMap.entrySet()) {
-            list.add(new Pair(entry.getKey(), entry.getValue()));
+    private fun getOrdinalListFromMap(): List<Pair<String?, Int?>> {
+            val list: MutableList<Pair<String?, Int?>> = ArrayList()
+            for ((key, value) in wordsMap) {
+                list.add(Pair(key, value))
+            }
+            return list
         }
-        return list;
-    }
 
-    public void updateWordsMapFromResponse(String data) {
-        wordsMap.clear();
-        String[] arr = data.split(" ");
-        for (int i = 0; i < arr.length; i++) {
+    fun updateWordsMapFromResponse(data: String) {
+        wordsMap.clear()
+        val arr = data.split(" ".toRegex()).toTypedArray()
+        for (i in arr.indices) {
             if (!arr[i].isEmpty() && isWord(arr[i])) {
                 try {
-                    int count = wordsMap.get(arr[i]);
-                    wordsMap.put(arr[i], ++count);
-                } catch (Exception exception) {
-                    wordsMap.put(arr[i], 1);
+                    var count = wordsMap[arr[i]]!!
+                    wordsMap[arr[i]] = ++count
+                } catch (exception: Exception) {
+                    wordsMap[arr[i]] = 1
                 }
             }
         }
     }
 
-    private boolean isWord(String s) {
-        if(s.length() < 3) return false;
-        for (int i = 0; i < s.length(); i++) {
-            if (!Character.isLetter(s.charAt(i)))
-                return false;
+    private fun isWord(s: String): Boolean {
+        if (s.length < 3) return false
+        for (i in 0 until s.length) {
+            if (!Character.isLetter(s[i])) return false
         }
-        return true;
+        return true
     }
 
-    public void onSearchClicked() {
-        showSearchLD.postValue(!showSearchLD.getValue());
+    fun onSearchClicked() {
+        showSearchLD.postValue(!showSearchLD.value!!)
     }
 
-    public void onSearchTextChanged(String searchedText) {
+    fun onSearchTextChanged(searchedText: String?) {
         if (searchedText == null || searchedText.isEmpty()) {
-            List<Pair<String, Integer>> list = getOrdinalListFromMap();
-            updateList(list);
+            val list = getOrdinalListFromMap()
+            updateList(list)
         } else {
-            List<Pair<String, Integer>> searchedList = getSearchedListFromMap(searchedText);
-            updateList(searchedList);
+            val searchedList = getSearchedListFromMap(searchedText)
+            updateList(searchedList)
         }
     }
 
-    private List<Pair<String, Integer>> getSearchedListFromMap(String searchedText) {
-        List<Pair<String, Integer>> list = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : wordsMap.entrySet()) {
-            if (entry.getKey().toLowerCase().contains(searchedText.toLowerCase())) {
-                list.add(new Pair(entry.getKey(), entry.getValue()));
+    private fun getSearchedListFromMap(searchedText: String): List<Pair<String?, Int?>> {
+        val list: MutableList<Pair<String?, Int?>> = ArrayList()
+        for ((key, value) in wordsMap) {
+            if (key.toLowerCase().contains(searchedText.toLowerCase())) {
+                list.add(Pair(key, value))
             }
         }
-        return list;
+        return list
     }
 
-    public void onSortClicked() {
-        List<Pair<String,Integer>> sortedList = sortItems();
-        updateList(sortedList);
-        isSortAscending = !isSortAscending;
+    fun onSortClicked() {
+        val sortedList = sortItems()
+        updateList(sortedList)
+        isSortAscending = !isSortAscending
     }
 
-    public List<Pair<String,Integer>> sortItems(){
-        HashMap<String,Integer> sortedList = Utils.sortByValue(wordsMap,isSortAscending);
-        List<Pair<String,Integer>> list = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : sortedList.entrySet()) {
-            Pair<String,Integer> newItem = new Pair(entry.getKey(),entry.getValue());
-            list.add(newItem);
+    fun sortItems(): List<Pair<String?, Int?>> {
+        val sortedList = Utils.sortByValue(wordsMap, isSortAscending)
+        val list: MutableList<Pair<String?, Int?>> = ArrayList()
+        for ((key, value) in sortedList) {
+            list.add(Pair(key,value))
         }
-        return list;
+        return list
     }
-
 }

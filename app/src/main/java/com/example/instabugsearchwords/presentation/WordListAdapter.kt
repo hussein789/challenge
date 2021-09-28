@@ -1,59 +1,43 @@
-package com.example.instabugsearchwords.presentation;
+package com.example.instabugsearchwords.presentation
 
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.util.Pair
+import androidx.recyclerview.widget.RecyclerView
+import com.example.instabugsearchwords.presentation.WordListAdapter.WordsViewHolder
+import android.view.ViewGroup
+import android.view.LayoutInflater
+import android.view.View
+import com.example.instabugsearchwords.R
+import android.widget.TextView
+import java.util.ArrayList
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.instabugsearchwords.R;
-import java.util.ArrayList;
-import java.util.List;
-
-public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordsViewHolder> {
-
-    private List<Pair<String,Integer>> wordsList = new ArrayList<>();
-
-    void setData(List<Pair<String,Integer>> newWords){
-        wordsList.clear();
-        wordsList.addAll(newWords);
-
+class WordListAdapter : RecyclerView.Adapter<WordsViewHolder>() {
+    private val wordsList: MutableList<Pair<String, Int>> = ArrayList()
+    fun setData(newWords: List<Pair<String, Int>>?) {
+        wordsList.clear()
+        wordsList.addAll(newWords!!)
     }
 
-    @NonNull
-    @Override
-    public WordListAdapter.WordsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.word_list_item,parent,false);
-        return new WordListAdapter.WordsViewHolder(view);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordsViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.word_list_item, parent, false)
+        return WordsViewHolder(view)
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull WordListAdapter.WordsViewHolder holder, int position) {
-        holder.bind(wordsList.get(position).first,wordsList.get(position).second);
+    override fun onBindViewHolder(holder: WordsViewHolder, position: Int) {
+        holder.bind(wordsList[position].first, wordsList[position].second)
     }
 
-    @Override
-    public int getItemCount() {
-        return wordsList.size();
+    override fun getItemCount(): Int {
+        return wordsList.size
     }
 
-    class WordsViewHolder extends RecyclerView.ViewHolder {
-        private TextView mWordName;
-        private TextView mWordCount;
-
-        public WordsViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mWordName = itemView.findViewById(R.id.tv_word_name);
-            mWordCount = itemView.findViewById(R.id.tv_word_count);
+    inner class WordsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val mWordName: TextView = itemView.findViewById(R.id.tv_word_name)
+        private val mWordCount: TextView = itemView.findViewById(R.id.tv_word_count)
+        fun bind(name: String, count: Int) {
+            mWordName.text = name
+            mWordCount.text = count.toString()
         }
 
-        private void bind(String name,int count){
-            mWordName.setText(name);
-            mWordCount.setText(String.valueOf(count));
-        }
     }
 }
