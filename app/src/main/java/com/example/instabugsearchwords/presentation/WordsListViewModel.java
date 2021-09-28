@@ -132,4 +132,33 @@ public class WordsListViewModel extends ViewModel {
         return list;
     }
 
+    public void onRefreshClicked() {
+        showSearchLD.postValue(false);
+        onSearchTextChanged("");
+        refreshList();
+    }
+
+    private void refreshList() {
+        showLoading.postValue(true);
+        wordsUseCase.refreshWords(new WordsCallback() {
+            @Override
+            public void onSuccess(String response) {
+                if(response.isEmpty()){
+                    showEmptyState.postValue(true);
+                } else {
+                    updateWordsMapFromResponse(response);
+                    List<Pair<String, Integer>> formattedList = getOrdinalListFromMap();
+                    updateList(formattedList);
+                }
+
+                showLoading.postValue(false);
+            }
+
+            @Override
+            public void onFail(String message) {
+                showError.postValue(true);
+                showLoading.postValue(false);
+            }
+        });
+    }
 }

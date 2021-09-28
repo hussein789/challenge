@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -55,8 +56,19 @@ public class WordsListFragment extends Fragment {
         mViewModel = new ViewModelProvider(this, factory).get(WordsListViewModel.class);
         initRecyclerView();
         initTextWatcher();
+        initSwipeToRefresh();
         observeViewModel();
         mViewModel.init();
+    }
+
+    private void initSwipeToRefresh() {
+        binding.swipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                binding.swipeToRefresh.setRefreshing(false);
+                mViewModel.onRefreshClicked();
+            }
+        });
     }
 
     @Override
@@ -130,8 +142,12 @@ public class WordsListFragment extends Fragment {
     }
 
     private void handleSearch(Boolean show) {
-        if (show) binding.etSearch.setVisibility(View.VISIBLE);
-        else binding.etSearch.setVisibility(View.GONE);
+        if (show){
+            binding.etSearch.setVisibility(View.VISIBLE);
+        } else {
+            mViewModel.onSearchTextChanged("");
+            binding.etSearch.setVisibility(View.GONE);
+        }
     }
 
     private void updateList(List<Pair<String, Integer>> list) {
