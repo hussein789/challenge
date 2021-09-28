@@ -1,6 +1,5 @@
 package com.example.instabugsearchwords.presentation;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.instabugsearchwords.R;
-import com.example.instabugsearchwords.WordsAdapter;
 import com.example.instabugsearchwords.databinding.WordsListFragmentBinding;
 import com.example.instabugsearchwords.domain.di.ServiceLocator;
 
@@ -47,18 +45,18 @@ public class WordsListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = WordsListFragmentBinding.inflate(inflater, container, false);
-        WordsListViewModelFactory factory = ServiceLocator.getInstance().provideWordsListFactory(requireActivity());
-        mViewModel = new ViewModelProvider(this, factory).get(WordsListViewModel.class);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        WordsListViewModelFactory factory = ServiceLocator.getInstance().provideWordsListFactory(requireActivity());
+        mViewModel = new ViewModelProvider(this, factory).get(WordsListViewModel.class);
         initRecyclerView();
         initTextWatcher();
         observeViewModel();
-        mViewModel.getWords();
+        mViewModel.init();
     }
 
     @Override
@@ -75,13 +73,12 @@ public class WordsListFragment extends Fragment {
         if (selectedItem == R.id.action_search) {
             mViewModel.onSearchClicked();
             return true;
-        } else if(selectedItem == R.id.action_sort) {
+        } else if (selectedItem == R.id.action_sort) {
             mViewModel.onSortClicked();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     private void initRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireActivity());
@@ -110,39 +107,38 @@ public class WordsListFragment extends Fragment {
         });
     }
 
-        private void observeViewModel () {
-            mViewModel.showLoading.observe(getViewLifecycleOwner(), showloading -> {
-                handleLoading(showloading);
-            });
+    private void observeViewModel() {
+        mViewModel.showLoading.observe(getViewLifecycleOwner(), showloading -> {
+            handleLoading(showloading);
+        });
 
-            mViewModel.showError.observe(getViewLifecycleOwner(), showError -> {
-                handleErrorState(showError);
-            });
+        mViewModel.showError.observe(getViewLifecycleOwner(), showError -> {
+            handleErrorState(showError);
+        });
 
-            mViewModel.showEmptyState.observe(getViewLifecycleOwner(), showEmpty -> {
-                handleEmptyState(showEmpty);
-            });
+        mViewModel.showEmptyState.observe(getViewLifecycleOwner(), showEmpty -> {
+            handleEmptyState(showEmpty);
+        });
 
-            mViewModel.updateList.observe(getViewLifecycleOwner(), list -> {
-                updateList(list);
-            });
+        mViewModel.updateList.observe(getViewLifecycleOwner(), list -> {
+            updateList(list);
+        });
 
-            mViewModel.showSearchLD.observe(getViewLifecycleOwner(), show -> {
-                handleSearch(show);
-            });
+        mViewModel.showSearchLD.observe(getViewLifecycleOwner(), show -> {
+            handleSearch(show);
+        });
+    }
 
-        }
+    private void handleSearch(Boolean show) {
+        if (show) binding.etSearch.setVisibility(View.VISIBLE);
+        else binding.etSearch.setVisibility(View.GONE);
+    }
 
-        private void handleSearch (Boolean show){
-            if (show) binding.etSearch.setVisibility(View.VISIBLE);
-            else binding.etSearch.setVisibility(View.GONE);
-        }
-
-        private void updateList (List < Pair < String, Integer >> list){
-            showList();
-            adapter.setData(list);
-            adapter.notifyDataSetChanged();
-        }
+    private void updateList(List<Pair<String, Integer>> list) {
+        showList();
+        adapter.setData(list);
+        adapter.notifyDataSetChanged();
+    }
 
     private void showList() {
         binding.tvError.setVisibility(View.GONE);
@@ -150,24 +146,24 @@ public class WordsListFragment extends Fragment {
         binding.rvWords.setVisibility(View.VISIBLE);
     }
 
-    private void handleEmptyState (Boolean showEmpty){
-            if (showEmpty) {
-                binding.tvError.setVisibility(View.GONE);
-                binding.tvEmptyText.setVisibility(View.VISIBLE);
-                binding.rvWords.setVisibility(View.GONE);
-            }
-        }
-
-        private void handleErrorState (Boolean showError){
-            if (showError) {
-                binding.tvError.setVisibility(View.VISIBLE);
-                binding.tvEmptyText.setVisibility(View.GONE);
-                binding.rvWords.setVisibility(View.GONE);
-            }
-        }
-
-        private void handleLoading (Boolean showloading){
-            if (showloading) binding.pbLoadingIndicator.setVisibility(View.VISIBLE);
-            else binding.pbLoadingIndicator.setVisibility(View.GONE);
+    private void handleEmptyState(Boolean showEmpty) {
+        if (showEmpty) {
+            binding.tvError.setVisibility(View.GONE);
+            binding.tvEmptyText.setVisibility(View.VISIBLE);
+            binding.rvWords.setVisibility(View.GONE);
         }
     }
+
+    private void handleErrorState(Boolean showError) {
+        if (showError) {
+            binding.tvError.setVisibility(View.VISIBLE);
+            binding.tvEmptyText.setVisibility(View.GONE);
+            binding.rvWords.setVisibility(View.GONE);
+        }
+    }
+
+    private void handleLoading(Boolean showloading) {
+        if (showloading) binding.pbLoadingIndicator.setVisibility(View.VISIBLE);
+        else binding.pbLoadingIndicator.setVisibility(View.GONE);
+    }
+}

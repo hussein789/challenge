@@ -1,20 +1,15 @@
 package com.example.instabugsearchwords.presentation;
 
 import android.util.Pair;
-
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
 import com.example.instabugsearchwords.data.repo.WordsCallback;
 import com.example.instabugsearchwords.domain.get_words.GetWordsUseCase;
 import com.example.instabugsearchwords.utils.Utils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import kotlin.collections.AbstractMutableList;
 
 public class WordsListViewModel extends ViewModel {
 
@@ -33,6 +28,9 @@ public class WordsListViewModel extends ViewModel {
     MutableLiveData<List<Pair<String, Integer>>> updateList = new MutableLiveData<>();
     MutableLiveData<Boolean> showSearchLD = new MutableLiveData<>(false);
 
+    public void init() {
+       getWords();
+    }
 
     void getWords() {
         showLoading.postValue(true);
