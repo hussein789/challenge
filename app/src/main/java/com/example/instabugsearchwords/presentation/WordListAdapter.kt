@@ -12,9 +12,9 @@ import java.util.ArrayList
 
 class WordListAdapter : RecyclerView.Adapter<WordsViewHolder>() {
     private val wordsList: MutableList<Pair<String, Int>> = ArrayList()
-    fun setData(newWords: List<Pair<String, Int>>?) {
+    fun setData(newWords: List<Pair<String, Int>>) {
         wordsList.clear()
-        wordsList.addAll(newWords!!)
+        wordsList.addAll(newWords)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordsViewHolder {

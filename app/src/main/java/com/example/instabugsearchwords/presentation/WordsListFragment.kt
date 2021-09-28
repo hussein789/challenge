@@ -86,7 +86,7 @@ class WordsListFragment : Fragment() {
             { showEmpty: Boolean -> handleEmptyState(showEmpty) })
         mViewModel.updateList.observe(
             viewLifecycleOwner,
-            { list: List<Pair<String, Int>> -> updateList(list) })
+            { list -> updateList(list) })
         mViewModel.showSearchLD.observe(
             viewLifecycleOwner,
             { show: Boolean -> handleSearch(show) })

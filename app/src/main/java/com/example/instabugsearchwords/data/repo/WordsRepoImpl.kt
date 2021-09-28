@@ -2,6 +2,7 @@ package com.example.instabugsearchwords.data.repo
 
 import com.example.instabugsearchwords.data.db.WordsCache
 import com.example.instabugsearchwords.data.network.NetworkUtils
+import com.example.instabugsearchwords.utils.Utils
 import java.io.IOException
 
 class WordsRepoImpl(private var networkUtils: NetworkUtils, private var wordsCache: WordsCache) : WordsRepo {
@@ -9,7 +10,7 @@ class WordsRepoImpl(private var networkUtils: NetworkUtils, private var wordsCac
     override fun getWords(callback: WordsCallback) {
         val cachedWords = wordsCache.wordsFromCache
         if (cachedWords == null || cachedWords.isEmpty()) {
-            MyApplication.executorService.execute {
+            Utils.executorService.execute {
                 val searchUrl = networkUtils.buildUrl()
                 try {
                     val response = networkUtils.getResponseFromHttpUrl(searchUrl)
@@ -26,7 +27,7 @@ class WordsRepoImpl(private var networkUtils: NetworkUtils, private var wordsCac
     }
 
     override fun refreshWords(callback: WordsCallback) {
-        MyApplication.executorService.execute {
+        Utils.executorService.execute {
             val searchUrl = networkUtils.buildUrl()
             try {
                 val response = networkUtils.getResponseFromHttpUrl(searchUrl)

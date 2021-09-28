@@ -1,8 +1,12 @@
 package com.example.instabugsearchwords.utils
 
 import java.util.*
+import java.util.concurrent.Executors
 
 object Utils {
+
+    val executorService = Executors.newFixedThreadPool(4)
+
     fun sortByValue(hm: Map<String, Int>, ascending: Boolean): HashMap<String, Int> {
         val list: List<Map.Entry<String, Int>> = LinkedList(hm.entries)
 

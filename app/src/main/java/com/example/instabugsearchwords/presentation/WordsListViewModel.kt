@@ -16,7 +16,7 @@ class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel(
     var showLoading = MutableLiveData<Boolean>()
     var showError = MutableLiveData<Boolean>()
     var showEmptyState = MutableLiveData<Boolean>()
-    var updateList = MutableLiveData<List<Pair<String?, Int?>>>()
+    var updateList = MutableLiveData<List<Pair<String, Int>>>()
     var showSearchLD = MutableLiveData(false)
 
     fun init() {
@@ -27,30 +27,30 @@ class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel(
 
         showLoading.postValue(true)
         wordsUseCase.getWords(object : WordsCallback {
-            override fun onSuccess(response: String?) {
-                if (response?.isEmpty() == true) {
+            override fun onSuccess(response: String) {
+                if (response.isEmpty() == true) {
                     showEmptyState.postValue(true)
                 } else {
-                    updateWordsMapFromResponse(response ?: "")
+                    updateWordsMapFromResponse(response)
                     val formattedList = getOrdinalListFromMap()
                     updateList(formattedList)
                 }
                 showLoading.postValue(false)
             }
 
-            override fun onFail(message: String?) {
+            override fun onFail(message: String) {
                 showError.postValue(true)
                 showLoading.postValue(false)
             }
         })
     }
 
-    private fun updateList(formattedList: List<Pair<String?, Int?>>) {
+    private fun updateList(formattedList: List<Pair<String, Int>>) {
         updateList.postValue(formattedList)
     }
 
-    private fun getOrdinalListFromMap(): List<Pair<String?, Int?>> {
-            val list: MutableList<Pair<String?, Int?>> = ArrayList()
+    private fun getOrdinalListFromMap(): List<Pair<String, Int>> {
+            val list: MutableList<Pair<String, Int>> = ArrayList()
             for ((key, value) in wordsMap) {
                 list.add(Pair(key, value))
             }
@@ -84,7 +84,7 @@ class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel(
         showSearchLD.postValue(!showSearchLD.value!!)
     }
 
-    fun onSearchTextChanged(searchedText: String?) {
+    fun onSearchTextChanged(searchedText: String) {
         if (searchedText == null || searchedText.isEmpty()) {
             val list = getOrdinalListFromMap()
             updateList(list)
@@ -94,8 +94,8 @@ class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel(
         }
     }
 
-    private fun getSearchedListFromMap(searchedText: String): List<Pair<String?, Int?>> {
-        val list: MutableList<Pair<String?, Int?>> = ArrayList()
+    private fun getSearchedListFromMap(searchedText: String): List<Pair<String, Int>> {
+        val list: MutableList<Pair<String, Int>> = ArrayList()
         for ((key, value) in wordsMap) {
             if (key.toLowerCase().contains(searchedText.toLowerCase())) {
                 list.add(Pair(key, value))
@@ -110,9 +110,9 @@ class WordsListViewModel(private val wordsUseCase: GetWordsUseCase) : ViewModel(
         isSortAscending = !isSortAscending
     }
 
-    fun sortItems(): List<Pair<String?, Int?>> {
+    fun sortItems(): List<Pair<String, Int>> {
         val sortedList = Utils.sortByValue(wordsMap, isSortAscending)
-        val list: MutableList<Pair<String?, Int?>> = ArrayList()
+        val list: MutableList<Pair<String, Int>> = ArrayList()
         for ((key, value) in sortedList) {
             list.add(Pair(key,value))
         }
